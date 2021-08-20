@@ -16,6 +16,19 @@ type ResourceInstanceChangeSrc struct {
 	// will apply to.
 	Addr addrs.AbsResourceInstance
 
+	// PrevRunAddr is the absolute address that this resource instance had at
+	// the conclusion of a previous run.
+	//
+	// This will typically be the same as Addr, but can be different if the
+	// previous resource instance was subject to a "moved" block that we
+	// handled in the process of creating this plan.
+	//
+	// For the initial creation of a resource instance there isn't really any
+	// meaningful "previous run address", but PrevRunAddr will still be set
+	// equal to Addr in that case in order to simplify logic elsewhere which
+	// aims to detect and react to the movement of instances between addresses.
+	PrevRunAddr addrs.AbsResourceInstance
+
 	// DeposedKey is the identifier for a deposed object associated with the
 	// given instance, or states.NotDeposed if this change applies to the
 	// current object.
@@ -68,6 +81,7 @@ func (rcs *ResourceInstanceChangeSrc) Decode(ty cty.Type) (*ResourceInstanceChan
 	}
 	return &ResourceInstanceChange{
 		Addr:            rcs.Addr,
+		PrevRunAddr:     rcs.PrevRunAddr,
 		DeposedKey:      rcs.DeposedKey,
 		ProviderAddr:    rcs.ProviderAddr,
 		Change:          *change,
